@@ -4,7 +4,7 @@
   "description": "esame",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node ./index.js"
   },
   "repository": {
@@ -16,5 +16,9 @@
   "bugs": {
     "url": "https://github.com/gianlucapasqua/pasqua-luglio-esame/issues"
   },
-  "homepage": "https://github.com/gianlucapasqua/pasqua-luglio-esame#readme"
+  "homepage": "https://github.com/gianlucapasqua/pasqua-luglio-esame#readme",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3"
+  }
 }
