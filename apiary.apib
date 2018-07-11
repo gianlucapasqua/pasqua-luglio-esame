@@ -154,6 +154,15 @@ definitions: # defined the structure of how the server answer to this actions
         type: boolean
       matches:
         type: array
+  Match:
+    required:
+      - opponent
+      - outcome
+    properties:
+      opponent:
+        type: string
+      outcome:
+        type: string
   Error:
     required:
       - code
