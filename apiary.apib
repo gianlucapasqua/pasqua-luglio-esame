@@ -1,80 +1,166 @@
-FORMAT: 1A
-HOST: http://polls.apiblueprint.org/
-
-# pasqua-luglio-esame
-
-Polls is a simple API allowing consumers to view polls and vote in them.
-
-## Questions Collection [/questions]
-
-### List All Questions [GET]
-
-+ Response 200 (application/json)
-
-        [
-            {
-                "question": "Favourite programming language?",
-                "published_at": "2015-08-05T08:40:51.620Z",
-                "choices": [
-                    {
-                        "choice": "Swift",
-                        "votes": 2048
-                    }, {
-                        "choice": "Python",
-                        "votes": 1024
-                    }, {
-                        "choice": "Objective-C",
-                        "votes": 512
-                    }, {
-                        "choice": "Ruby",
-                        "votes": 256
-                    }
-                ]
-            }
-        ]
-
-### Create a New Question [POST]
-
-You may create your own question using this action. It takes a JSON
-object containing a question and a collection of answers in the
-form of choices.
-
-+ Request (application/json)
-
-        {
-            "question": "Favourite programming language?",
-            "choices": [
-                "Swift",
-                "Python",
-                "Objective-C",
-                "Ruby"
-            ]
-        }
-
-+ Response 201 (application/json)
-
-    + Headers
-
-            Location: /questions/2
-
-    + Body
-
-            {
-                "question": "Favourite programming language?",
-                "published_at": "2015-08-05T08:40:51.620Z",
-                "choices": [
-                    {
-                        "choice": "Swift",
-                        "votes": 0
-                    }, {
-                        "choice": "Python",
-                        "votes": 0
-                    }, {
-                        "choice": "Objective-C",
-                        "votes": 0
-                    }, {
-                        "choice": "Ruby",
-                        "votes": 0
-                    }
-                ]
-            }
+swagger: "2.0"
+info:
+  version: 1.0.0
+  title: "pasqua-luglio-esame" #
+  description: pasqua-luglio-esame API
+  termsOfService: http://swagger.io/terms/
+  contact:
+    name: Gianluca Pasqua #
+    email: pasqua.gianluca@gmail.com #
+    url: http://miosito.net #
+  license:
+    name: MIT
+    url: http://github.com/gruntjs/grunt/blob/master/LICENSE-MIT
+host: pasqua-luglio-esame.herokuapp.com # url della mia applicazione su heroku
+basePath: / # lascio il percorso base
+schemes:
+  - https # heroku necessita dell' httpS
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /teams: # primo 'path' del mio server
+    get:
+      description: | 
+        Return all the teams uploaded on the server
+      operationId: getTeams #
+      parameters:
+        - name: teamid #
+          in: query
+          description: Unique id of the team #
+          required: false # means that this parameter is not necessary for the operation. it's optional
+          type: string #
+      responses:
+        200:
+          description: list of all the teams #
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Team' # links to the end of this file where is defined the structure of the response for this action
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      description: Uploads a new team. #
+      operationId: addTeam #
+      parameters:
+        - name: team #
+          in: body
+          description: Allows users to upload new team #
+          required: true
+          schema:
+            $ref: '#/definitions/NewTeam'
+      responses:
+        200:
+          description: team created response #
+          schema:
+            $ref: '#/definitions/Team' #
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  
+  
+  /teams/{id}:
+    get:
+      description: Returns specified team
+      operationId: getTeam
+      parameters:
+        - name: id
+          in: path
+          description: ID of team to fetch
+          required: true
+          type: string
+      responses:
+        200:
+          description: Searched team data
+          schema:
+            $ref: '#/definitions/Team'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    put:
+      description: Updates an existing team, or create a new one with ID.
+      operationId: updateTeam
+      parameters:
+        - name: id
+          in: path
+          description: ID of team to edit or create
+          required: true
+          type: string
+          x-example: 'some-example'
+        - name: teamname
+          in: body
+          description: team name
+          required: true
+          schema:
+            $ref: '#/definitions/Team'
+      responses:
+        202:
+          description: team update response
+          schema:
+            $ref: '#/definitions/Team'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    
+    delete:
+      description: Delete specified Team
+      operationId: deleteTeam
+      parameters:
+        - name: id
+          in: path
+          description: ID of team to delete
+          required: true
+          type: string
+      responses:
+        204:
+          description: team deleted
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions: # defined the structure of how the server answer to this actions
+  Team:
+    allOf:
+      - $ref: '#/definitions/NewTeam'
+      - required:
+        - teamid
+        properties:
+          teamid:
+            type: string
+          teamname:
+            type: string
+          is_still_in: 
+            type: boolean
+          matches:
+            type: array
+  NewTeam:
+    required:
+      - teamid
+      - teamname
+      - is_still_in
+      - matches
+    properties:
+      teamid:
+        type: string
+      teamname:
+        type: string
+      is_still_in:
+        type: boolean
+      matches:
+        type: array
+  Error:
+    required:
+      - code
+      - message
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
